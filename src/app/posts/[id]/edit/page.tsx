@@ -53,16 +53,34 @@ export default function EditPostPage() {
     setSaving(true);
     setError('');
 
-    const { error } = await supabase
-      .from('posts')
-      .update({ title, body, image_url: imageUrl || null })
-      .eq('id', id);
+    try {
+      // Regenerate summary on edit
+      const res = await fetch('/api/generate-summary', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ body }),
+      });
+      
+      let newSummary = post?.summary || null;
+      if (res.ok) {
+        const { summary: generatedSummary } = await res.json();
+        if (generatedSummary) newSummary = generatedSummary;
+      }
 
-    if (error) {
-      setError(error.message);
+      const { error: updateError } = await supabase
+        .from('posts')
+        .update({ title, body, image_url: imageUrl || null, summary: newSummary })
+        .eq('id', id);
+
+      if (updateError) {
+        setError(updateError.message);
+        setSaving(false);
+      } else {
+        router.push(`/posts/${id}`);
+      }
+    } catch (err) {
+      setError('An unexpected error occurred while saving.');
       setSaving(false);
-    } else {
-      router.push(`/posts/${id}`);
     }
   };
 
@@ -83,7 +101,7 @@ export default function EditPostPage() {
           <div className="page-header">
             <Link href={`/posts/${id}`} style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>← Back to post</Link>
             <h1 style={{ marginTop: '16px' }}>Edit Post</h1>
-            <p>Update your post content. The existing AI summary will be preserved.</p>
+            <p>Update your post content. The AI summary will be automatically regenerated to match your new text.</p>
           </div>
 
           <div className="post-form-card">

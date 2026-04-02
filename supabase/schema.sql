@@ -1,5 +1,5 @@
 -- ============================================================
--- Hivon Automations Blog Platform - Supabase Schema
+-- Hivon Blogs Platform - Supabase Schema
 -- Run this in the Supabase SQL Editor
 -- ============================================================
 
@@ -54,6 +54,7 @@ begin
 end;
 $$ language plpgsql;
 
+drop trigger if exists update_posts_updated_at on public.posts;
 create trigger update_posts_updated_at
   before update on public.posts
   for each row execute function update_updated_at_column();
@@ -107,11 +108,12 @@ create policy "Authors update own posts, admins update all"
     )
   );
 
--- Only admins can delete posts
-create policy "Admins can delete any post"
+-- Only admins can delete posts (legacy) or Authors can delete their own posts
+create policy "Admins can delete any post, authors delete own"
   on public.posts for delete
   using (
-    exists (
+    auth.uid() = author_id
+    or exists (
       select 1 from public.users
       where id = auth.uid() and role = 'admin'
     )
@@ -138,7 +140,34 @@ create policy "Users delete own comments, admins delete all"
     )
   );
 
+
 -- ============================================================
--- SAMPLE ADMIN USER (update email after creating via auth)
--- After signing up, run: update public.users set role = 'admin' where email = 'admin@yourdomain.com';
+-- LIKES TABLE
+-- ============================================================
+create table if not exists public.likes (
+  id uuid default uuid_generate_v4() primary key,
+  post_id uuid references public.posts(id) on delete cascade not null,
+  user_id uuid references public.users(id) on delete cascade not null,
+  created_at timestamptz default now(),
+  unique(post_id, user_id) -- Prevent duplicate likes
+);
+
+alter table public.likes enable row level security;
+
+-- Everyone can read likes (needed for counts)
+create policy "Likes are viewable by everyone"
+  on public.likes for select using (true);
+
+-- Authenticated users can insert their own likes
+create policy "Authenticated users can like posts"
+  on public.likes for insert
+  with check (auth.uid() = user_id and auth.uid() is not null);
+
+-- Users can unlike (delete their own likes)
+create policy "Users can unlike their own likes"
+  on public.likes for delete
+  using (auth.uid() = user_id);
+
+-- ============================================================
+-- SAMPLE ADMIN USER ... (rest of the file)
 -- ============================================================

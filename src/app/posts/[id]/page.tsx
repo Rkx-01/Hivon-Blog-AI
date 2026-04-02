@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase/client';
 import { Post } from '@/types';
 import { useAuth } from '@/context/AuthContext';
 import CommentSection from '@/components/CommentSection';
+import LikeButton from '@/components/LikeButton';
 
 export default function PostDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -19,18 +20,49 @@ export default function PostDetailPage() {
   const supabase = createClient();
 
   const fetchPost = useCallback(async () => {
-    const { data, error } = await supabase
-      .from('posts')
-      .select('*, author:users(id, name, role)')
-      .eq('id', id)
-      .single();
+    try {
+      // 1. Get current user
+      const { data: { user } } = await supabase.auth.getUser();
 
-    if (error || !data) {
+      // 2. Fetch post without likes join first
+      const { data, error } = await supabase
+        .from('posts')
+        .select('*, author:users(id, name, role)')
+        .eq('id', id)
+        .single();
+
+      if (error || !data) {
+        setNotFound(true);
+      } else {
+        const transformed = {
+          ...data,
+          likes_count: 0,
+          user_has_liked: false
+        };
+
+        // 3. Try to fetch likes separately
+        try {
+          const { data: likesData } = await supabase
+            .from('likes')
+            .select('user_id')
+            .eq('post_id', id);
+
+          if (likesData) {
+            transformed.likes_count = likesData.length;
+            transformed.user_has_liked = likesData.some(l => l.user_id === user?.id);
+          }
+        } catch (likeErr) {
+          console.warn('Likes table missing or error:', likeErr);
+        }
+
+        setPost(transformed as Post);
+      }
+    } catch (err) {
+      console.error('fetchPost crashed:', err);
       setNotFound(true);
-    } else {
-      setPost(data as Post);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }, [id, supabase]);
 
   useEffect(() => {
@@ -41,6 +73,34 @@ export default function PostDetailPage() {
     if (!confirm('Delete this post permanently?')) return;
     await supabase.from('posts').delete().eq('id', id);
     router.push('/');
+  };
+
+  const regenerateSummary = async () => {
+    if (!post) return;
+    setLoading(true);
+    try {
+      const res = await fetch('/api/generate-summary', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ body: post.body }),
+      });
+      const data = await res.json();
+      if (data.summary) {
+        const { error } = await supabase
+          .from('posts')
+          .update({ summary: data.summary })
+          .eq('id', id);
+        if (error) throw error;
+        setPost({ ...post, summary: data.summary });
+        alert('✦ AI Summary updated!');
+      } else {
+        alert('⚠️ AI Summary could not be generated: ' + (data.error || 'Unknown error'));
+      }
+    } catch (err: any) {
+      alert('Error: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const formatDate = (dateStr: string) =>
@@ -55,7 +115,7 @@ export default function PostDetailPage() {
     return (
       <div className="page">
         <div className="container">
-          <div className="empty-state"><div className="empty-state-icon">⏳</div><h3>Loading post...</h3></div>
+          <div className="empty-state"><h3>Loading post...</h3></div>
         </div>
       </div>
     );
@@ -66,10 +126,9 @@ export default function PostDetailPage() {
       <div className="page">
         <div className="container">
           <div className="empty-state">
-            <div className="empty-state-icon">🔍</div>
             <h3>Post not found</h3>
             <p>This post may have been removed.</p>
-            <Link href="/" className="btn btn-primary">Back to Home</Link>
+            <Link href="/" className="btn btn-secondary">Back to Home</Link>
           </div>
         </div>
       </div>
@@ -102,9 +161,22 @@ export default function PostDetailPage() {
             <div className="user-avatar" style={{ width: 32, height: 32, fontSize: '0.75rem' }}>
               {post.author?.name?.charAt(0).toUpperCase()}
             </div>
-            <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>{post.author?.name}</span>
+            <span style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-primary)' }}>{post.author?.name}</span>
             <span style={{ color: 'var(--text-muted)' }}>·</span>
-            <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>{formatDate(post.created_at)}</span>
+            <span style={{ color: 'var(--text-muted)' }}>{formatDate(post.created_at)}</span>
+            <span style={{ color: 'var(--text-muted)' }}>·</span>
+            <span style={{ color: 'var(--accent)' }}>
+              {Math.max(1, Math.ceil(post.body.split(' ').length / 200))} min read
+            </span>
+            <span style={{ color: 'var(--text-muted)' }}>·</span>
+            <div style={{ transform: 'translateY(1px)' }}>
+              <LikeButton
+                postId={post.id}
+                initialLikes={post.likes_count || 0}
+                initialHasLiked={post.user_has_liked || false}
+                size="sm"
+              />
+            </div>
 
             {/* Edit/Delete actions */}
             {canEdit && (
@@ -124,12 +196,16 @@ export default function PostDetailPage() {
           <h1 className="post-detail-title font-display">{post.title}</h1>
 
           {/* AI Summary Card */}
-          {post.summary && (
+          {post.summary ? (
             <div className="summary-card">
-              <div className="summary-card-header">
-                <span>✦</span> AI Summary
-              </div>
               <p>{post.summary}</p>
+            </div>
+          ) : canEdit && (
+            <div className="summary-card" style={{ borderStyle: 'dashed', opacity: 0.7, padding: '24px', textAlign: 'center' }}>
+              <p style={{ fontSize: '0.9rem', marginBottom: '16px' }}>No summary found for this intelligence node.</p>
+              <button onClick={regenerateSummary} className="btn btn-primary" style={{ padding: '8px 16px', fontSize: '0.85rem' }}>
+                ✦ Generate AI Summary Now
+              </button>
             </div>
           )}
 
