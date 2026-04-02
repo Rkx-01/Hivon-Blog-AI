@@ -19,7 +19,7 @@ export default function Navbar() {
       <div className="container navbar-inner">
         <Link href="/" className="navbar-brand">
           <div className="navbar-logo">✦</div>
-          Hivon Blog
+          Hivon Blogs
         </Link>
 
         <div className="navbar-links">
@@ -28,9 +28,14 @@ export default function Navbar() {
           {!loading && profile && (
             <>
               {(profile.role === 'author' || profile.role === 'admin') && (
-                <Link href="/posts/create" className="navbar-link">
-                  + Write
-                </Link>
+                <>
+                  <Link href="/dashboard" className="navbar-link">
+                    Dashboard
+                  </Link>
+                  <Link href="/posts/create" className="navbar-link">
+                    + Write
+                  </Link>
+                </>
               )}
               {profile.role === 'admin' && (
                 <Link href="/admin" className="navbar-link">
