@@ -59,7 +59,7 @@ export default function RegisterPage() {
         <div className="auth-header">
           <div className="auth-logo">✦</div>
           <h1>Create account</h1>
-          <p>Join the Hivon Blog community</p>
+          <p>Join the Hivon Blogs community</p>
         </div>
 
         <form onSubmit={handleRegister} className="auth-form">
