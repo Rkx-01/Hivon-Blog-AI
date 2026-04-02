@@ -19,13 +19,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const prompt = `You are a professional blog editor. Summarize the following blog post in approximately 200 words. Write in a clear, engaging, third-person style that captures the key points and entices readers to read the full post. Do not include any headers or bullet points — write as a single flowing paragraph.
-
-Blog post:
-${body.slice(0, 4000)}`;
+    const prompt = `You are a professional blog editor for Hivon Blogs. Provide a meaningful, comprehensive summary of the following blog post. The summary should be approximately 200 words in length, ensuring it captures all major themes, arguments, and conclusions. 
+    
+    Structure the summary to be engaging, insightful, and readable. Write in a sophisticated third-person style. Do not use headers or bullet points—provide a clean, cohesive narrative.
+    
+    Blog post:
+    ${body.slice(0, 8000)}`;
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -33,7 +35,6 @@ ${body.slice(0, 4000)}`;
           contents: [{ parts: [{ text: prompt }] }],
           generationConfig: {
             temperature: 0.7,
-            maxOutputTokens: 350,
           },
         }),
       }
