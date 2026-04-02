@@ -18,6 +18,8 @@ export interface Post {
   created_at: string;
   updated_at?: string;
   author?: User;
+  likes_count?: number;
+  user_has_liked?: boolean;
 }
 
 export interface Comment {

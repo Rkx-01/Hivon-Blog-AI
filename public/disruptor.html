@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DISRUPTOR — Hivon Blogs</title>
+  <meta name="description" content="The industrial-grade platform designed for extreme output. Ship faster. Break the rules." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Ranchers&family=Space+Mono:wght@400;700&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" rel="stylesheet" />
+  <style>
+    /* =============================================
+       DISRUPTOR — NEO-BRUTALIST DESIGN SYSTEM
+       ============================================= */
+    :root {
+      --bg-base:   #121212;
+      --bg-black:  #000000;
+      --bg-white:  #FFFFFF;
+      --volt:      #CCFF00;
+      --grey-muted:#475569;
+
+      --font-headers: 'Ranchers', cursive;
+      --font-mono:    'Space Mono', monospace;
+      --font-body:    'Plus Jakarta Sans', sans-serif;
+
+      --border-4: 4px solid #000000;
+      --border-8: 8px solid #000000;
+      --neo-sm:   4px 4px 0 0 #000000;
+      --neo-md:   8px 8px 0 0 #000000;
+      --neo-w:    8px 8px 0 0 #FFFFFF;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background-color: var(--bg-base);
+      color: var(--bg-white);
+      font-family: var(--font-body);
+      font-size: 16px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; text-decoration: none; }
+    img { max-width: 100%; display: block; }
+
+    /* UTILITY */
+    .mono {
+      font-family: var(--font-mono);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .ranchers { font-family: var(--font-headers); }
+
+    /* BRUTALIST BUTTON */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 14px 28px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      border: var(--border-4);
+      border-radius: 8px;
+      cursor: pointer;
+      background: var(--bg-white);
+      color: #000;
+      box-shadow: var(--neo-sm);
+      transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.1s ease;
+      text-decoration: none;
+    }
+    .btn:hover { transform: translate(4px, 4px); box-shadow: 0 0 0 0 #000; background: var(--volt); }
+    .btn-volt { background: var(--volt); color: #000; }
+    .btn-volt:hover { background: var(--bg-white); }
+
+    /* =============================================
+       LAYOUT SHELL
+       ============================================= */
+    .layout {
+      display: flex;
+      width: 100%;
+      min-height: 100vh;
+    }
+    .main-content {
+      flex: 1;
+      overflow-x: hidden;
+    }
+
+    /* =============================================
+       HEADER NAVIGATION
+       ============================================= */
+    .site-nav {
+      position: sticky;
+      top: 0;
+      z-index: 200;
+      background: var(--bg-white);
+      border-bottom: var(--border-4);
+      padding: 20px 48px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .logo-box {
+      width: 42px;
+      height: 42px;
+      background: #000;
+      transform: rotate(3deg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .logo-box span { color: var(--bg-white); font-size: 22px; }
+    .logo-text {
+      font-family: var(--font-body);
+      font-weight: 800;
+      font-size: 28px;
+      color: #000;
+    }
+    .nav-right { display: flex; align-items: center; gap: 20px; }
+    .tech-badge {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 8px 14px;
+      border: var(--border-4);
+      box-shadow: var(--neo-sm);
+      background: var(--bg-white);
+      color: #000;
+    }
+
+    /* =============================================
+       HERO SECTION
+       ============================================= */
+    .hero {
+      padding: 100px 64px 80px;
+      position: relative;
+      overflow: hidden;
+    }
+    .sticker-badge {
+      display: inline-block;
+      background: var(--bg-white);
+      color: #000;
+      border: var(--border-4);
+      padding: 8px 18px;
+      transform: rotate(-2deg);
+      margin-bottom: 36px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+    }
+    .hero-headline {
+      font-family: var(--font-headers);
+      font-size: clamp(80px, 12vw, 180px);
+      line-height: 0.85;
+      text-transform: uppercase;
+      color: var(--bg-white);
+      text-shadow: 6px 6px 0 #000;
+      margin-bottom: 32px;
+    }
+    .hero-subheadline {
+      font-size: 24px;
+      font-style: italic;
+      color: var(--grey-muted);
+      max-width: 580px;
+      margin-bottom: 56px;
+      line-height: 1.35;
+    }
+    /* BRUTALIST FORM */
+    .waitlist-form {
+      display: flex;
+      max-width: 600px;
+      border: var(--border-4);
+      background: var(--bg-white);
+      box-shadow: var(--neo-md);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .waitlist-input {
+      flex: 1;
+      padding: 18px 24px;
+      font-family: var(--font-mono);
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      border: none;
+      background: transparent;
+      color: #000;
+      outline: none;
+    }
+    .waitlist-input::placeholder { color: #aaa; }
+    .waitlist-input:focus { outline: none; }
+    .waitlist-submit {
+      font-family: var(--font-headers);
+      font-size: 28px;
+      padding: 0 40px;
+      border: none;
+      border-left: var(--border-4);
+      border-radius: 0;
+      background: #000;
+      color: var(--bg-white);
+      cursor: pointer;
+      transition: background 0.1s ease, color 0.1s ease;
+      text-transform: uppercase;
+    }
+    .waitlist-submit:hover { background: var(--volt); color: #000; }
+
+    /* =============================================
+       SOCIAL PROOF STICKER BAR
+       ============================================= */
+    .proof-bar {
+      background: var(--bg-white);
+      border-top: var(--border-8);
+      border-bottom: var(--border-8);
+      padding: 40px 48px;
+      display: flex;
+      gap: 28px;
+      overflow-x: auto;
+    }
+    .proof-bar::-webkit-scrollbar { height: 4px; }
+    .proof-card {
+      flex-shrink: 0;
+      min-width: 300px;
+      border: var(--border-4);
+      padding: 20px;
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      box-shadow: var(--neo-sm);
+      background: var(--bg-white);
+    }
+    .proof-card:nth-child(1) { transform: rotate(-2deg); }
+    .proof-card:nth-child(2) { transform: rotate(1.5deg); }
+    .proof-card:nth-child(3) { transform: rotate(-1deg); }
+    .proof-card:nth-child(4) { transform: rotate(2deg); }
+    .proof-avatar {
+      width: 48px;
+      height: 48px;
+      background: #000;
+      flex-shrink: 0;
+    }
+    .proof-text {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #000;
+      line-height: 1.4;
+    }
+
+    /* =============================================
+       HIGH IMPACT COMPARISON
+       ============================================= */
+    .comparison {
+      border-bottom: var(--border-8);
+    }
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+    .comparison-cell {
+      padding: 80px 64px;
+    }
+    .old-way {
+      background: var(--bg-black);
+    }
+    .new-way {
+      background: var(--volt);
+      border-left: var(--border-8);
+    }
+    .comparison-label {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+    .old-way .comparison-label { color: var(--grey-muted); }
+    .new-way .comparison-label { color: #000; }
+    .comparison-title {
+      font-family: var(--font-headers);
+      font-size: clamp(50px, 7vw, 80px);
+      line-height: 0.85;
+      text-transform: uppercase;
+    }
+    .old-way .comparison-title { color: var(--grey-muted); }
+    .new-way .comparison-title { color: #000; }
+
+    /* =============================================
+       PROCESS BLUEPRINT
+       ============================================= */
+    .blueprint {
+      padding: 80px 48px;
+      background: var(--bg-base);
+    }
+    .blueprint-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 40px;
+    }
+    .blueprint-card {
+      background: var(--bg-white);
+      border: 8px solid #000;
+      padding: 40px 32px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--neo-w);
+      color: #000;
+    }
+    .blueprint-watermark {
+      position: absolute;
+      top: -20px;
+      right: -10px;
+      font-family: var(--font-headers);
+      font-size: 200px;
+      color: #000;
+      opacity: 0.03;
+      line-height: 0.85;
+      pointer-events: none;
+      user-select: none;
+    }
+    .step-tag {
+      display: inline-block;
+      background: var(--volt);
+      border: var(--border-4);
+      padding: 4px 12px;
+      margin-bottom: 28px;
+      transform: rotate(-2deg);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: #000;
+      box-shadow: var(--neo-sm);
+    }
+    .blueprint-card h3 {
+      font-family: var(--font-headers);
+      font-size: clamp(32px, 4vw, 48px);
+      text-transform: uppercase;
+      line-height: 0.9;
+      color: #000;
+      margin-bottom: 20px;
+    }
+    .blueprint-card p {
+      font-family: var(--font-body);
+      font-size: 15px;
+      color: var(--grey-muted);
+      line-height: 1.6;
+    }
+
+    /* =============================================
+       BRUTALIST COUNTDOWN TIMER
+       ============================================= */
+    .countdown-section {
+      padding: 64px 48px;
+      background: var(--bg-base);
+      border-top: var(--border-8);
+      border-bottom: var(--border-8);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 40px;
+    }
+    .countdown-label {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--grey-muted);
+    }
+    .countdown-boxes {
+      display: flex;
+      gap: 16px;
+    }
+    .countdown-box {
+      background: #1e1e1e;
+      border: var(--border-4);
+      padding: 28px;
+      min-width: 130px;
+      text-align: center;
+      box-shadow: 4px 4px 0 0 #FFFFFF;
+    }
+    .countdown-num {
+      font-family: var(--font-body);
+      font-weight: 800;
+      font-size: 56px;
+      color: var(--volt);
+      line-height: 1;
+      display: block;
+      margin-bottom: 10px;
+    }
+    .countdown-unit {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--grey-muted);
+    }
+
+    /* =============================================
+       SECOND WAITLIST (BOTTOM)
+       ============================================= */
+    .bottom-cta {
+      background: var(--volt);
+      border-top: var(--border-8);
+      padding: 96px 64px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 40px;
+      text-align: center;
+    }
+    .bottom-cta h2 {
+      font-family: var(--font-headers);
+      font-size: clamp(64px, 10vw, 120px);
+      text-transform: uppercase;
+      line-height: 0.85;
+      color: #000;
+    }
+    .bottom-waitlist-form {
+      display: flex;
+      max-width: 620px;
+      width: 100%;
+      border: var(--border-4);
+      background: #000;
+      box-shadow: var(--neo-md);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .bottom-waitlist-input {
+      flex: 1;
+      padding: 18px 24px;
+      font-family: var(--font-mono);
+      font-size: 14px;
+      letter-spacing: 0.08em;
+      border: none;
+      background: transparent;
+      color: var(--volt);
+      outline: none;
+      text-transform: uppercase;
+    }
+    .bottom-waitlist-input::placeholder { color: #444; }
+    .bottom-waitlist-submit {
+      font-family: var(--font-headers);
+      font-size: 28px;
+      padding: 0 40px;
+      border: none;
+      border-left: 4px solid var(--volt);
+      background: var(--volt);
+      color: #000;
+      cursor: pointer;
+      transition: background 0.1s ease, color 0.1s ease;
+    }
+    .bottom-waitlist-submit:hover { background: var(--bg-white); }
+
+    /* =============================================
+       STRUCTURAL SIDEBAR (Blueprint Tabs)
+       ============================================= */
+    .sidebar {
+      width: 192px;
+      border-left: var(--border-8);
+      display: flex;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      flex-shrink: 0;
+    }
+    .sidebar-tab {
+      flex: 1;
+      background: var(--bg-white);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-right: var(--border-4);
+    }
+    .sidebar-tab:last-child { border-right: none; }
+    .sidebar-tab span {
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+      font-family: var(--font-mono);
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: #000;
+    }
+
+    /* =============================================
+       RESPONSIVE
+       ============================================= */
+    @media (max-width: 900px) {
+      .sidebar { display: none; }
+      .comparison-grid { grid-template-columns: 1fr; }
+      .new-way { border-left: none; border-top: var(--border-8); }
+      .blueprint-grid { grid-template-columns: 1fr; }
+      .hero-headline { font-size: 72px; }
+      .hero { padding: 60px 24px; }
+      .countdown-boxes { flex-wrap: wrap; justify-content: center; }
+      .bottom-cta { padding: 64px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="layout">
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+
+    <!-- STICKY HEADER NAV -->
+    <nav class="site-nav">
+      <div class="nav-logo">
+        <div class="logo-box"><span>✦</span></div>
+        <span class="logo-text">Hivon Blogs</span>
+      </div>
+      <div class="nav-right">
+        <div class="tech-badge">SYS.V2.4.0 — ACTIVE</div>
+        <a href="/auth/register" class="btn btn-volt">JOIN BETA</a>
+      </div>
+    </nav>
+
+    <!-- HERO SECTION -->
+    <section class="hero">
+      <div class="sticker-badge">🔒 DEPLOYMENT PROTOCOL ACTIVE</div>
+      <h1 class="hero-headline">SHIP<br/>FASTER.<br/>BREAK<br/>RULES.</h1>
+      <p class="hero-subheadline">
+        The industrial-grade platform designed for extreme output. Drop the corporate fluff and build brutally efficient systems that scale to infinity.
+      </p>
+      <!-- BRUTALIST WAITLIST FORM -->
+      <form class="waitlist-form" onsubmit="return false;">
+        <input class="waitlist-input" type="email" placeholder="ENTER SECURE EMAIL..." />
+        <button class="waitlist-submit" type="submit">EXECUTE</button>
+      </form>
+    </section>
+
+    <!-- SOCIAL PROOF STICKER BAR -->
+    <section class="proof-bar">
+      <div class="proof-card">
+        <div class="proof-avatar"></div>
+        <p class="proof-text">"INCREDIBLE OUTPUT SPEED. WENT FROM ZERO TO PRODUCTION IN 48HRS."</p>
+      </div>
+      <div class="proof-card">
+        <div class="proof-avatar"></div>
+        <p class="proof-text">"FINALLY, A PLATFORM THAT DOESN'T CODDLE ENGINEERS."</p>
+      </div>
+      <div class="proof-card">
+        <div class="proof-avatar"></div>
+        <p class="proof-text">"BRUTAL EFFICIENCY. EXACTLY WHAT WE NEEDED."</p>
+      </div>
+      <div class="proof-card">
+        <div class="proof-avatar"></div>
+        <p class="proof-text">"THIS IS WHAT SHIPPING AT WARP SPEED LOOKS LIKE."</p>
+      </div>
+    </section>
+
+    <!-- HIGH IMPACT COMPARISON -->
+    <section class="comparison">
+      <div class="comparison-grid">
+        <div class="comparison-cell old-way">
+          <div class="comparison-label">VERSION.OLD — THE STATUS QUO</div>
+          <div class="comparison-title">FRAGILE.<br/>BLOATED.<br/>SLOW.</div>
+        </div>
+        <div class="comparison-cell new-way">
+          <div class="comparison-label">VERSION.NEW — THE BETTER WAY</div>
+          <div class="comparison-title">BRUTAL.<br/>PRECISE.<br/>FAST.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROCESS BLUEPRINT -->
+    <section class="blueprint">
+      <div class="blueprint-grid">
+        <div class="blueprint-card">
+          <div class="blueprint-watermark">01</div>
+          <div class="step-tag">PHASE 01</div>
+          <h3>DESIGN</h3>
+          <p>Raw architectural schematics. No wireframe tools, no meetings. Lock the structure and move.</p>
+        </div>
+        <div class="blueprint-card">
+          <div class="blueprint-watermark">02</div>
+          <div class="step-tag">PHASE 02</div>
+          <h3>BUILD</h3>
+          <p>Assemble the industrial stack. Bypass soft constraints. Deploy to metal, not managed cloud.</p>
+        </div>
+        <div class="blueprint-card">
+          <div class="blueprint-watermark">03</div>
+          <div class="step-tag">PHASE 03</div>
+          <h3>SHIP</h3>
+          <p>Achieve maximum exit velocity. No staging. No QA. Straight to production or go home.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- BRUTALIST COUNTDOWN TIMER -->
+    <section class="countdown-section">
+      <div class="countdown-label">⚡ BETA ACCESS CLOSES IN</div>
+      <div class="countdown-boxes" id="countdown">
+        <div class="countdown-box">
+          <span class="countdown-num" id="c-days">14</span>
+          <span class="countdown-unit">DAYS</span>
+        </div>
+        <div class="countdown-box">
+          <span class="countdown-num" id="c-hours">23</span>
+          <span class="countdown-unit">HOURS</span>
+        </div>
+        <div class="countdown-box">
+          <span class="countdown-num" id="c-mins">59</span>
+          <span class="countdown-unit">MINS</span>
+        </div>
+        <div class="countdown-box">
+          <span class="countdown-num" id="c-secs">00</span>
+          <span class="countdown-unit">SECS</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- BOTTOM CTA -->
+    <section class="bottom-cta">
+      <h2>DON'T WAIT.<br/>EXECUTE.</h2>
+      <form class="bottom-waitlist-form" onsubmit="return false;">
+        <input class="bottom-waitlist-input" type="email" placeholder="YOUR SECURE EMAIL..." />
+        <button class="bottom-waitlist-submit" type="submit">GO</button>
+      </form>
+    </section>
+
+  </main>
+
+  <!-- STRUCTURAL SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-tab"><span>DESIGN</span></div>
+    <div class="sidebar-tab"><span>BUILD</span></div>
+    <div class="sidebar-tab"><span>SHIP</span></div>
+  </aside>
+</div>
+
+<script>
+  // Live countdown timer
+  const target = new Date();
+  target.setDate(target.getDate() + 14);
+
+  function update() {
+    const now = new Date();
+    const diff = target - now;
+    if (diff <= 0) return;
+
+    const d = Math.floor(diff / 86400000);
+    const h = Math.floor((diff % 86400000) / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+
+    document.getElementById('c-days').textContent  = String(d).padStart(2, '0');
+    document.getElementById('c-hours').textContent = String(h).padStart(2, '0');
+    document.getElementById('c-mins').textContent  = String(m).padStart(2, '0');
+    document.getElementById('c-secs').textContent  = String(s).padStart(2, '0');
+  }
+
+  update();
+  setInterval(update, 1000);
+</script>
+</body>
+</html>

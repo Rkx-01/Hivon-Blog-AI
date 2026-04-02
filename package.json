@@ -1,5 +1,5 @@
 {
-  "name": "hivon-blog",
+  "name": "hivon-blogs",
   "version": "1.0.0",
   "private": true,
   "scripts": {
@@ -9,6 +9,9 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@fontsource/plus-jakarta-sans": "^5.2.8",
+    "@fontsource/ranchers": "^5.2.8",
+    "@fontsource/space-mono": "^5.2.9",
     "@supabase/ssr": "^0.6.1",
     "@supabase/supabase-js": "^2.49.4",
     "next": "14.2.29",

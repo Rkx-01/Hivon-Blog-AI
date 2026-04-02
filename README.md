@@ -1,6 +1,6 @@
-# Hivon Blog — AI-Powered Blogging Platform
+# Hivon Blogs — AI-Powered Blogging Platform
 
-A full-stack blogging platform built with **Next.js 14**, **Supabase**, and **Google Gemini AI**. Built as part of the Hivon Automations technical assignment using Antigravity (AI coding assistant).
+A full-stack blogging platform built with **Next.js 14**, **Supabase**, and **Google Gemini AI**. Built as part of the Hivon Blogs project.
 
 ## ✦ Features
 
@@ -38,8 +38,8 @@ A full-stack blogging platform built with **Next.js 14**, **Supabase**, and **Go
 
 ### 1. Clone & Install
 ```bash
-git clone https://github.com/YOUR_USERNAME/hivon-blog.git
-cd hivon-blog
+git clone https://github.com/YOUR_USERNAME/hivon-blogs.git
+cd hivon-blogs
 npm install
 ```
 
@@ -128,8 +128,8 @@ sudo apt-get install -y nodejs
 npm install -g pm2
 
 # Clone repo
-git clone https://github.com/YOUR_USERNAME/hivon-blog.git
-cd hivon-blog
+git clone https://github.com/YOUR_USERNAME/hivon-blogs.git
+cd hivon-blogs
 npm install
 
 # Set environment variables
@@ -140,7 +140,7 @@ nano .env.local  # fill in your values
 npm run build
 
 # Start with PM2
-pm2 start npm --name "hivon-blog" -- start
+pm2 start npm --name "hivon-blogs" -- start
 pm2 save
 pm2 startup
 ```
@@ -190,6 +190,7 @@ src/
 ├── lib/supabase/
 │   ├── client.ts               # Browser client
 │   └── server.ts               # Server client
+│   └── server.ts               # Server client
 ├── middleware.ts                # Route protection
 └── types/index.ts              # TypeScript types
 supabase/
@@ -213,4 +214,4 @@ This project was built using **Antigravity** (by Google DeepMind), an AI coding 
 
 ---
 
-*Built for Hivon Automations Technical Assignment · 2026*
+*Built for Hivon Blogs · 2026*
