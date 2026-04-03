@@ -907,8 +907,12 @@ body:has(.page) .hivon-gallery {
   padding: 40px 24px;
   font-size: 0.8rem;
   color: var(--text-secondary);
-  border-top: 1px solid var(--border);
+  background: rgba(247, 244, 237, 0.75); /* Match .page transparency */
+  backdrop-filter: blur(4px);
+  border-top: 1px solid rgba(0, 0, 0, 0.05); /* Softer border */
   margin-top: auto;
+  position: relative;
+  z-index: 10;
 }
 
 /* ============================================================
