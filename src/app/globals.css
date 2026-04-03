@@ -110,7 +110,7 @@ h3 {
 main {
   position: relative;
   z-index: 100; /* Content layer */
-  background: var(--bg-primary);
+  background: transparent;
   display: flex;
   flex-direction: column;
 }
@@ -125,8 +125,8 @@ main {
   min-height: calc(100vh - 150px);
   padding-top: 2rem;
   padding-bottom: 4rem;
-  background: rgba(247, 244, 237, 0.82); /* Translucent Ivory to show global animated bars */
-  backdrop-filter: blur(4px); /* Optional: slight blur for depth */
+  background: rgba(247, 244, 237, 0.75); /* More translucent to show global animated bars */
+  backdrop-filter: blur(4px);
   position: relative;
   z-index: 1;
 }

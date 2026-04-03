@@ -57,7 +57,7 @@ const GradientBars: React.FC<GradientBarsProps> = ({
                   maxWidth: `calc(100% / ${numBars})`,
                   height: 'calc(100% + 40px)',
                   bottom: '-20px',
-                  background: `linear-gradient(to top, ${gradientFrom}, ${gradientTo})`,
+                  background: `linear-gradient(to bottom, ${gradientFrom} 0%, ${gradientTo} 40%, ${gradientTo} 60%, ${gradientFrom} 100%)`,
                   transform: `scaleY(${height / 100})`,
                   transformOrigin: 'bottom',
                   transition: 'transform 0.5s ease-in-out',
