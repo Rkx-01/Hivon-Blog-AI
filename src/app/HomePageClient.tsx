@@ -20,6 +20,7 @@ export default function HomePageClient({ initialPosts, initialCount }: HomePageC
   const router = useRouter();
   const searchParams = useSearchParams();
   const isFeedView = searchParams.get('feed') === 'true';
+  const [hasHydrated, setHasHydrated] = useState(false);
   
   // Initialize with SSR data to prevent flash
   const [posts, setPosts] = useState<Post[]>(initialPosts);
@@ -105,12 +106,14 @@ export default function HomePageClient({ initialPosts, initialCount }: HomePageC
 
   // Handle pagination/refresh
   useEffect(() => {
-    // Skip first fetch if we are on page 1 and just hydrated, 
-    // EXCEPT we need to check likes if user is logged in.
+    if (!hasHydrated && page === 1) {
+      setHasHydrated(true);
+      return;
+    }
     const controller = new AbortController();
     fetchPosts(controller.signal);
     return () => controller.abort();
-  }, [fetchPosts]);
+  }, [fetchPosts, page, hasHydrated]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
