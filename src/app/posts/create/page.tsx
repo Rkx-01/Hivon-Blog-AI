@@ -15,6 +15,7 @@ export default function CreatePostPage() {
   const [imageUrl, setImageUrl] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [uploading, setUploading] = useState(false);
   const [aiStatus, setAiStatus] = useState('');
   const [publishState, setPublishState] = useState<'idle' | 'processing' | 'success'>('idle');
   const { profile, supabaseUser, loading: authLoading } = useAuth();
@@ -28,22 +29,60 @@ export default function CreatePostPage() {
     }
   }, [authLoading, supabaseUser, profile, router]);
 
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    setError('');
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('post-images')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('post-images')
+        .getPublicUrl(filePath);
+
+      setImageUrl(publicUrl);
+    } catch (err: any) {
+      setError(`Upload failed: ${err.message}`);
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!supabaseUser) return;
 
     setLoading(true);
     setError('');
+    
+    // 0. Pre-validation for AI Summary
+    if (body.trim().length < 50) {
+      setError('The blog content is too short for AI analysis. Please write at least 50 characters to publish.');
+      setLoading(false);
+      return;
+    }
+
     setAiStatus('✦ Generating AI summary...');
 
     setPublishState('processing');
 
-    // Force the cool hyper-speed animation to display for at least 3 seconds
-    // so the visual layout doesn't just flash instantly on fast networks.
-    const minAnimationTime = new Promise(resolve => setTimeout(resolve, 3000));
+    // No artificial delay - make it as fast as possible
+    const minAnimationTime = Promise.resolve();
 
-    // 1. Generate AI summary
+    // 1. Generate AI summary (Mandatory as requested)
     let summary: string | null = null;
+    setAiStatus('✦ Generating AI summary...');
     try {
       const res = await fetch('/api/generate-summary', {
         method: 'POST',
@@ -53,12 +92,17 @@ export default function CreatePostPage() {
       const data = await res.json();
       if (data.summary) {
         summary = data.summary;
-        setAiStatus('✦ Summary generated!');
+        setAiStatus('✦ AI Summary generated!');
       } else {
-        setAiStatus('⚠️ Summary skipped (no API key or error).');
+        throw new Error(data.error || 'AI Summary could not be generated.');
       }
-    } catch {
-      setAiStatus('⚠️ Summary generation failed, continuing without it.');
+    } catch (err: any) {
+      console.error('AI Summary failed (Fallback triggered):', err);
+      // FAANG Pattern: Graceful Fallback for non-critical services (AI)
+      // Allow publishing to proceed even if the AI quota is reached.
+      summary = "✦ Our AI is busy right now, but your intelligence is not. We will be back soon with a fresh summary.";
+      setAiStatus('✦ AI is currently offline. Using placeholder summary.');
+      // Do NOT return; proceed to Supabase insert
     }
 
     // Create a promise that rejects after 10 seconds
@@ -72,44 +116,38 @@ export default function CreatePostPage() {
         (async () => {
           // 2. Create post in Supabase
           console.log('Inserting post into Supabase...');
-          const { data: postData, error: insertError } = await supabase
+          const { data, error: insertError } = await supabase
             .from('posts')
             .insert({
               title,
               body,
               image_url: imageUrl || null,
               author_id: supabaseUser.id,
-              summary,
+              summary, // Synchronous with post creation
             })
             .select()
             .single();
 
           console.log('Supabase insert finished. Error:', insertError);
 
-          // Always wait for the minimum animation duration to complete
-          await minAnimationTime;
 
           if (insertError) {
             throw insertError;
           }
 
-          if (!postData) {
+          if (!data) {
             throw new Error('No data returned from server.');
           }
 
           console.log('Publish successful! Redirecting...');
-          setPublishState('success');
-
-          setTimeout(() => {
-            router.push(`/posts/${postData.id}`);
-          }, 1000);
+          router.push(`/posts/${data.id}`);
         })(),
         timeoutPromise
       ]);
 
     } catch (err: any) {
-      console.error('Submission failed:', err);
-      setError(`Critical Error: ${err.message || 'Unknown error'}`);
+      console.error('Submission CRITICAL failure:', err);
+      setError(`Critical Error: ${err.message || 'Unknown server error'}. Please refresh and try again.`);
       setAiStatus('');
       setLoading(false);
       setPublishState('idle');
@@ -243,24 +281,54 @@ export default function CreatePostPage() {
               </div>
 
               <div className="form-group">
-                <label htmlFor="imageUrl">Featured Image URL</label>
-                <input
-                  id="imageUrl"
-                  type="url"
-                  value={imageUrl}
-                  onChange={(e) => setImageUrl(e.target.value)}
-                  placeholder="https://example.com/image.jpg"
-                />
-                {imageUrl && (
-                  <Image
-                    src={imageUrl}
-                    alt="Preview"
-                    width={800}
-                    height={200}
-                    className="image-preview"
-                    unoptimized
-                    onError={() => setImageUrl('')}
+                <label htmlFor="imageUrl">Featured Image</label>
+                <div style={{ display: 'flex', gap: '12px', marginBottom: '8px', alignItems: 'center' }}>
+                  <div style={{ position: 'relative', flex: '0 0 auto' }}>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      disabled={uploading}
+                      style={{ position: 'absolute', opacity: 0, inset: 0, cursor: 'pointer', zIndex: 2 }}
+                    />
+                    <button type="button" className="btn btn-secondary" style={{ pointerEvents: 'none' }}>
+                      {uploading ? '⌛ Uploading...' : '📁 Upload from Computer'}
+                    </button>
+                  </div>
+                  <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>OR</span>
+                  <input
+                    id="imageUrl"
+                    type="url"
+                    value={imageUrl}
+                    onChange={(e) => setImageUrl(e.target.value)}
+                    placeholder="Paste image URL"
+                    style={{ flex: 1 }}
                   />
+                </div>
+                {imageUrl && (
+                  <div style={{ position: 'relative', marginTop: '12px' }}>
+                    <Image
+                      src={imageUrl}
+                      alt="Preview"
+                      width={800}
+                      height={200}
+                      className="image-preview"
+                      unoptimized
+                      style={{ width: '100%', height: '200px', objectFit: 'cover', borderRadius: 'var(--radius-md)' }}
+                    />
+                    <button 
+                      type="button" 
+                      onClick={() => setImageUrl('')}
+                      style={{ 
+                        position: 'absolute', top: '12px', right: '12px', 
+                        background: 'rgba(0,0,0,0.5)', color: 'white', 
+                        border: 'none', borderRadius: '4px', cursor: 'pointer', 
+                        padding: '6px 10px', fontSize: '12px', backdropFilter: 'blur(4px)'
+                      }}
+                    >
+                      ✕ Remove Image
+                    </button>
+                  </div>
                 )}
               </div>
 

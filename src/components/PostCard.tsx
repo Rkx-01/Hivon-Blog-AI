@@ -20,6 +20,19 @@ export default function PostCard({ post }: PostCardProps) {
   return (
     <Link href={`/posts/${post.id}`} style={{ textDecoration: 'none' }}>
       <article className="post-card">
+        {post.image_url && (
+          <div className="post-card-image-wrapper">
+             <Image
+              src={post.image_url}
+              alt={post.title}
+              width={400}
+              height={200}
+              className="post-card-image"
+              unoptimized
+            />
+          </div>
+        )}
+
         <div className="post-card-meta">
           <span className="post-card-category">
             {post.author?.role === 'admin' ? 'Featured' : 'Story'}
@@ -36,19 +49,6 @@ export default function PostCard({ post }: PostCardProps) {
             {post.summary || (post.body.slice(0, 140) + '...')}
           </p>
         </div>
-
-        {post.image_url && (
-          <div className="post-card-image-wrapper">
-             <Image
-              src={post.image_url}
-              alt={post.title}
-              width={400}
-              height={200}
-              className="post-card-image"
-              unoptimized
-            />
-          </div>
-        )}
 
         <div className="post-card-footer">
           <span className="read-more">Continue reading</span>

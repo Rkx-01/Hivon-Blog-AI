@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { Comment } from '@/types';
 import { useAuth } from '@/context/AuthContext';
+import ConfirmationModal from './ui/ConfirmationModal';
 
 interface CommentSectionProps {
   postId: string;
@@ -15,6 +16,8 @@ export default function CommentSection({ postId }: CommentSectionProps) {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [commentToDelete, setCommentToDelete] = useState<string | null>(null);
   const { profile, supabaseUser } = useAuth();
   const supabase = createClient();
 
@@ -55,9 +58,16 @@ export default function CommentSection({ postId }: CommentSectionProps) {
     setSubmitting(false);
   };
 
-  const handleDelete = async (commentId: string) => {
-    await supabase.from('comments').delete().eq('id', commentId);
-    setComments((prev) => prev.filter((c) => c.id !== commentId));
+  const handleDeleteRequest = (commentId: string) => {
+    setCommentToDelete(commentId);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!commentToDelete) return;
+    await supabase.from('comments').delete().eq('id', commentToDelete);
+    setComments((prev) => prev.filter((c) => c.id !== commentToDelete));
+    setCommentToDelete(null);
   };
 
   const formatDate = (dateStr: string) =>
@@ -120,7 +130,7 @@ export default function CommentSection({ postId }: CommentSectionProps) {
                 <button
                   className="btn btn-ghost"
                   style={{ padding: '4px 10px', fontSize: '0.75rem', color: 'var(--danger)' }}
-                  onClick={() => handleDelete(comment.id)}
+                  onClick={() => handleDeleteRequest(comment.id)}
                 >
                   Delete
                 </button>
@@ -129,6 +139,19 @@ export default function CommentSection({ postId }: CommentSectionProps) {
           ))}
         </div>
       )}
+
+      <ConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={() => {
+          setShowDeleteModal(false);
+          setCommentToDelete(null);
+        }}
+        onConfirm={confirmDelete}
+        title="Delete Comment"
+        message="Are you sure you want to delete this comment? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+      />
     </section>
   );
 }

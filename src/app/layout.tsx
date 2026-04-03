@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { AuthProvider } from '@/context/AuthContext';
 import Navbar from '@/components/Navbar';
+import NavigationReset from '@/components/NavigationReset';
+import { Suspense } from 'react';
 
 export const metadata: Metadata = {
   title: 'Hivon Blogs — AI-Powered Blogging Platform',
@@ -17,8 +19,9 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <AuthProvider>
+          <NavigationReset />
           <Navbar />
-          <main>{children}</main>
+          <main style={{ position: 'relative', zIndex: 10, background: 'var(--bg-primary)', minHeight: 'calc(100vh - 150px)' }}>{children}</main>
           <footer className="global-footer">
             Hivon Blogs © 2026 · Powered by Gemini AI
           </footer>

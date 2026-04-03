@@ -11,8 +11,9 @@ import { useAuth } from '@/context/AuthContext';
 import { Post } from '@/types';
 
 // Extend post to include comments count
-interface DashboardPost extends Post {
+interface DashboardPost extends Omit<Post, 'author'> {
   comments: [{ count: number }];
+  author?: { name: string };
 }
 
 export default function DashboardPage() {
@@ -34,21 +35,34 @@ export default function DashboardPage() {
   const supabase = createClient();
 
   const fetchDashboardData = useCallback(async () => {
-    if (!supabaseUser) return;
+    if (!supabaseUser || !profile) return;
 
-    // Fetch posts by this author and get a count of comments for each
-    const { data: postsData, error: postsError } = await supabase
+    // Build Post Query
+    let postsQuery = supabase
       .from('posts')
-      .select('*, comments(count)')
-      .eq('author_id', supabaseUser.id)
+      .select('*, comments(count), author:users(name)')
       .order('created_at', { ascending: false });
 
-    const { data: commentsData } = await supabase
+    // Filter by author unless user is admin
+    if (profile.role !== 'admin') {
+      postsQuery = postsQuery.eq('author_id', supabaseUser.id);
+    }
+
+    const { data: postsData, error: postsError } = await postsQuery;
+
+    // Build Comments Query
+    let commentsQuery = supabase
       .from('comments')
-      .select('*, post:posts!inner(id, title), user:users(id, name)')
-      .eq('posts.author_id', supabaseUser.id)
+      .select('*, post:posts!inner(id, title, author_id), user:users(id, name)')
       .order('created_at', { ascending: false })
       .limit(5);
+
+    // Filter comments by author's posts unless user is admin
+    if (profile.role !== 'admin') {
+      commentsQuery = commentsQuery.eq('posts.author_id', supabaseUser.id);
+    }
+
+    const { data: commentsData } = await commentsQuery;
 
     if (postsError) {
       console.error('Error fetching dashboard data:', postsError);
@@ -59,7 +73,7 @@ export default function DashboardPage() {
       setRecentComments(commentsData);
     }
     setLoading(false);
-  }, [supabaseUser, supabase]);
+  }, [supabaseUser, profile, supabase]);
 
   useEffect(() => {
     if (!authLoading && !profile) {
@@ -72,6 +86,12 @@ export default function DashboardPage() {
       }
     }
   }, [authLoading, profile, router, fetchDashboardData]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('hivon_back_target', '/dashboard');
+    }
+  }, []);
 
   const requestDelete = (postId: string) => {
     setModalState({
@@ -162,10 +182,10 @@ export default function DashboardPage() {
         <div className="section-header" style={{ marginBottom: '40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
           <div>
             <h1 className="font-display" style={{ fontSize: '36px', marginBottom: '8px' }}>
-              Welcome back, {profile?.name}
+              Welcome back, {profile?.name?.toUpperCase() === 'ADMIN USER' ? 'ADMIN' : profile?.name}
             </h1>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <span className="role-badge author" style={{ color: 'var(--accent)', fontWeight: 'bold' }}>
+              <span className={`role-badge ${profile?.role}`} style={{ color: 'var(--accent)', fontWeight: 'bold' }}>
                 {profile?.role.toUpperCase()}
               </span>
             </div>
@@ -207,7 +227,7 @@ export default function DashboardPage() {
           <>
             <div className="section-header" style={{ borderBottom: '1px solid var(--border)', paddingBottom: '16px', marginBottom: '24px' }}>
               <h2 style={{ fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-secondary)' }}>
-                My Posts
+                {profile?.role === 'admin' ? 'All Site Posts' : 'My Posts'}
               </h2>
             </div>
             <div className="admin-table">
@@ -216,6 +236,9 @@ export default function DashboardPage() {
                   <tr style={{ borderBottom: '1px solid var(--border)' }}>
                     <th style={{ width: '60px', padding: '12px' }}></th>
                     <th style={{ padding: '12px', textAlign: 'left', color: 'var(--text-secondary)', fontSize: '0.75rem', textTransform: 'uppercase' }}>Title</th>
+                    {profile?.role === 'admin' && (
+                      <th style={{ padding: '12px', textAlign: 'left', color: 'var(--text-secondary)', fontSize: '0.75rem', textTransform: 'uppercase' }}>Author</th>
+                    )}
                     <th style={{ padding: '12px', textAlign: 'left', color: 'var(--text-secondary)', fontSize: '0.75rem', textTransform: 'uppercase' }}>Date</th>
                     <th style={{ padding: '12px', textAlign: 'left', color: 'var(--text-secondary)', fontSize: '0.75rem', textTransform: 'uppercase' }}>Comments</th>
                     <th style={{ padding: '12px', textAlign: 'left', color: 'var(--text-secondary)', fontSize: '0.75rem', textTransform: 'uppercase' }}>AI Signal</th>
@@ -237,6 +260,11 @@ export default function DashboardPage() {
                           {post.title}
                         </Link>
                       </td>
+                      {profile?.role === 'admin' && (
+                        <td style={{ padding: '12px', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                          {post.author?.name || 'Unknown'}
+                        </td>
+                      )}
                       <td style={{ padding: '12px', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>{formatDate(post.created_at)}</td>
                       <td style={{ padding: '12px', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
                          💬 {post.comments?.[0]?.count || 0}
@@ -271,7 +299,7 @@ export default function DashboardPage() {
             {/* Recent Comments */}
             <div className="section-header" style={{ borderBottom: '1px solid var(--border)', paddingBottom: '16px', marginBottom: '24px', marginTop: '64px' }}>
               <h2 style={{ fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-secondary)' }}>
-                Recent Comments On My Posts
+                {profile?.role === 'admin' ? 'Recent Site Comments' : 'Recent Comments On My Posts'}
               </h2>
             </div>
             

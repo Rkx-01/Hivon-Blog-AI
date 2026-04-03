@@ -15,6 +15,7 @@ export default function EditPostPage() {
   const [imageUrl, setImageUrl] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
   const { profile, supabaseUser } = useAuth();
   const router = useRouter();
@@ -48,23 +49,65 @@ export default function EditPostPage() {
     }
   }, [loading, post, profile, supabaseUser, router]);
 
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    setError('');
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('post-images')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('post-images')
+        .getPublicUrl(filePath);
+
+      setImageUrl(publicUrl);
+    } catch (err: any) {
+      setError(`Upload failed: ${err.message}`);
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     setError('');
 
     try {
-      // Regenerate summary on edit
-      const res = await fetch('/api/generate-summary', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ body }),
-      });
-      
       let newSummary = post?.summary || null;
-      if (res.ok) {
-        const { summary: generatedSummary } = await res.json();
-        if (generatedSummary) newSummary = generatedSummary;
+      try {
+        const res = await fetch('/api/generate-summary', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ body }),
+        });
+        
+        if (res.ok) {
+          const { summary: generatedSummary } = await res.json();
+          if (generatedSummary) newSummary = generatedSummary;
+        } else {
+          // Status 429 or other non-OK status
+          console.warn('AI Summary regeneration failed (non-OK status).');
+          if (!newSummary) {
+            newSummary = "✦ Our AI is busy right now, but your intelligence is not. We will be back soon with a fresh summary.";
+          }
+        }
+      } catch (aiErr) {
+        console.error('AI Summary regeneration failed (exception):', aiErr);
+        if (!newSummary) {
+          newSummary = "✦ Our AI is busy right now, but your intelligence is not. We will be back soon with a fresh summary.";
+        }
       }
 
       const { error: updateError } = await supabase
@@ -119,14 +162,51 @@ export default function EditPostPage() {
               </div>
 
               <div className="form-group">
-                <label htmlFor="imageUrl">Featured Image URL</label>
-                <input
-                  id="imageUrl"
-                  type="url"
-                  value={imageUrl}
-                  onChange={(e) => setImageUrl(e.target.value)}
-                  placeholder="https://example.com/image.jpg"
-                />
+                <label htmlFor="imageUrl">Featured Image</label>
+                <div style={{ display: 'flex', gap: '12px', marginBottom: '8px', alignItems: 'center' }}>
+                  <div style={{ position: 'relative', flex: '0 0 auto' }}>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      disabled={uploading}
+                      style={{ position: 'absolute', opacity: 0, inset: 0, cursor: 'pointer', zIndex: 2 }}
+                    />
+                    <button type="button" className="btn btn-secondary" style={{ pointerEvents: 'none' }}>
+                      {uploading ? '⌛ Uploading...' : '📁 Upload from Computer'}
+                    </button>
+                  </div>
+                  <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>OR</span>
+                  <input
+                    id="imageUrl"
+                    type="url"
+                    value={imageUrl}
+                    onChange={(e) => setImageUrl(e.target.value)}
+                    placeholder="Paste image URL"
+                    style={{ flex: 1 }}
+                  />
+                </div>
+                {imageUrl && (
+                  <div style={{ position: 'relative', marginTop: '12px' }}>
+                    <img
+                      src={imageUrl}
+                      alt="Preview"
+                      style={{ width: '100%', height: '200px', objectFit: 'cover', borderRadius: 'var(--radius-md)' }}
+                    />
+                    <button 
+                      type="button" 
+                      onClick={() => setImageUrl('')}
+                      style={{ 
+                        position: 'absolute', top: '12px', right: '12px', 
+                        background: 'rgba(0,0,0,0.5)', color: 'white', 
+                        border: 'none', borderRadius: '4px', cursor: 'pointer', 
+                        padding: '6px 10px', fontSize: '12px', backdropFilter: 'blur(4px)'
+                      }}
+                    >
+                      ✕ Remove Image
+                    </button>
+                  </div>
+                )}
               </div>
 
               <div className="form-group">

@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 
+import { Skeleton } from '@/components/ui/Skeleton';
+
 export default function Navbar() {
   const { profile, loading, signOut } = useAuth();
   const router = useRouter();
@@ -17,15 +19,20 @@ export default function Navbar() {
   return (
     <nav className="navbar">
       <div className="container navbar-inner">
-        <Link href="/" className="navbar-brand">
+        <Link href="/?feed=true" className="navbar-brand">
           <div className="navbar-logo">✦</div>
           Hivon Blogs
         </Link>
 
         <div className="navbar-links">
-          <Link href="/" className="navbar-link">Home</Link>
+          <Link href="/?feed=true" className="navbar-link">Home</Link>
 
-          {!loading && profile && (
+          {loading ? (
+            <div style={{ display: 'flex', gap: '20px', marginLeft: '12px' }}>
+              <Skeleton width="60px" height="1rem" borderRadius="4px" />
+              <Skeleton width="50px" height="1rem" borderRadius="4px" />
+            </div>
+          ) : profile ? (
             <>
               {(profile.role === 'author' || profile.role === 'admin') && (
                 <>
@@ -37,26 +44,32 @@ export default function Navbar() {
                   </Link>
                 </>
               )}
-              {profile.role === 'admin' && (
-                <Link href="/admin" className="navbar-link">
-                  Admin
-                </Link>
-              )}
             </>
-          )}
+          ) : null}
         </div>
 
         <div className="navbar-user">
-          {loading ? null : profile ? (
+          {loading ? (
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+              <Skeleton width="80px" height="32px" borderRadius="16px" />
+              <Skeleton width="32px" height="32px" circle />
+            </div>
+          ) : profile ? (
             <>
               <div className="user-badge">
                 <div className="user-avatar">
                   {profile.name?.charAt(0).toUpperCase()}
                 </div>
                 <span
-                  className={`role-badge ${profile.role}`}
+                  style={{ 
+                    fontWeight: 600, 
+                    color: 'var(--text-primary)', 
+                    fontSize: '0.85rem',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em'
+                  }}
                 >
-                  {profile.role}
+                  {profile.name?.toUpperCase() === 'ADMIN USER' ? 'ADMIN' : profile.name}
                 </span>
               </div>
               <button onClick={handleSignOut} className="btn btn-secondary" style={{ padding: '8px 14px', fontSize: '0.8rem' }}>

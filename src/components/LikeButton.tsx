@@ -17,7 +17,7 @@ export default function LikeButton({
   initialHasLiked,
   size = 'md' 
 }: LikeButtonProps) {
-  const { supabaseUser } = useAuth();
+  const { supabaseUser, loading: authLoading } = useAuth();
   const [likes, setLikes] = useState(initialLikes);
   const [hasLiked, setHasLiked] = useState(initialHasLiked);
   const [loading, setLoading] = useState(false);
@@ -26,6 +26,9 @@ export default function LikeButton({
   const handleLike = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+
+    // FAANG Fix: Prevent guest alerts during hydration/loading
+    if (authLoading) return;
 
     if (!supabaseUser) {
       alert('Please sign in to like posts.');

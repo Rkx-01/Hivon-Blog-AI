@@ -34,9 +34,8 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   // Protect these routes - require auth
-  // Note: /dashboard and /posts/create are deliberately omitted here so that 'AuthContext' 
-  // can natively handle its own security loop via localStorage for ghost sessions.
-  const protectedPaths = ['/admin'];
+  // Now including /dashboard and /posts/create for robust server-side security.
+  const protectedPaths = ['/admin', '/dashboard', '/posts/create'];
   const isProtected = protectedPaths.some((path) =>
     request.nextUrl.pathname.startsWith(path)
   );

@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700&display=swap');
 
 /* ============================================================
@@ -103,6 +107,14 @@ h3 {
 /* ============================================================
    LAYOUT
    ============================================================ */
+main {
+  position: relative;
+  z-index: 100; /* Content layer */
+  background: var(--bg-primary);
+  display: flex;
+  flex-direction: column;
+}
+
 .container {
   max-width: 1200px;
   margin: 0 auto;
@@ -110,9 +122,17 @@ h3 {
 }
 
 .page {
-  min-height: calc(100vh - 72px);
+  min-height: calc(100vh - 150px);
   padding-top: 2rem;
   padding-bottom: 4rem;
+  background: var(--bg-primary); /* Ensure solid background to cover fixed elements */
+  position: relative;
+  z-index: 1; /* Local stack in main */
+}
+
+/* Force hide gallery when blog feed is active to prevent 'bleed-through' in blurs/vignettes */
+body:has(.page) .hivon-gallery {
+  display: none !important;
 }
 
 /* ============================================================
@@ -121,13 +141,13 @@ h3 {
 .navbar {
   position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: 10000; /* Pinned above content */
   height: 72px;
   display: flex;
   align-items: center;
-  background: rgba(247, 244, 237, 0.9);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--border);
+  background: rgba(247, 244, 237, 0.7); /* Slightly more transparent */
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(229, 226, 217, 0.5);
 }
 
 .navbar-inner {
@@ -481,7 +501,8 @@ h3 {
   padding: 24px;
   background: var(--bg-card) !important;
   border: 1px solid var(--border);
-  border-top: 2px solid var(--accent); /* Hivon signature accent */
+  border-top: 2px solid var(--accent);
+  /* Hivon signature accent */
   border-radius: var(--radius-lg);
   transition: all 0.2s ease;
   height: 100%;
@@ -696,11 +717,11 @@ h3 {
 }
 
 .summary-card p {
-  color: var(--text-primary);
-  font-size: 1.05rem;
-  font-style: italic;
-  font-family: 'Instrument Serif', serif;
-  line-height: 1.5;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  font-style: normal;
+  font-family: 'Inter', sans-serif;
+  line-height: 1.7;
 }
 
 .post-body {

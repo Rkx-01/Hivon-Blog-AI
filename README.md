@@ -1,17 +1,15 @@
 # Hivon Blogs — AI-Powered Blogging Platform
 
-A full-stack blogging platform built with **Next.js 14**, **Supabase**, and **Google Gemini AI**. Built as part of the Hivon Blogs project.
+A premium, high-performance editorial platform built with **Next.js 14 (App Router)**, **Supabase**, and **Google Gemini AI**. Optimized for speed, visual stability, and a cinematic reading experience.
 
 ## ✦ Features
 
-- **Role-Based Access Control** — Author, Viewer, Admin with distinct permissions
-- **AI-Powered Summaries** — Gemini 1.5 Flash generates ~200-word summaries on post creation
-- **Authentication** — Supabase Auth with email/password
-- **Blog CRUD** — Create, read, edit, delete posts with featured images
-- **Comments System** — Authenticated users can comment; admins can moderate
-- **Search & Pagination** — Real-time search + 9-posts-per-page pagination
-- **Admin Dashboard** — Manage all posts and comments with stats overview
-- **Premium Dark UI** — Inter + Playfair Display typography, glassmorphism navbar
+- **Server-Side Rendering (SSR)** — Instant-on page loads with pre-fetched blog data and zero hydration flicker.
+- **Cinematic "Ivory Edition" UI** — A bespoke design system using **Instrument Serif** and **Inter** typography, featuring a dynamic circular hero gallery.
+- **AI-Powered Summaries** — Gemini 1.5 Flash generates mandatory, professional summaries for every published post.
+- **Role-Based Access Control** — Author, Viewer, Admin with strict server-side route protection.
+- **Resilient Publishing** — Graceful fallbacks for AI service limits to ensure 100% uptime for content creators.
+- **History-Aware Navigation** — Defensive "Fresh Start" logic to ensure a clean state on page refreshes.
 
 ---
 
@@ -19,13 +17,12 @@ A full-stack blogging platform built with **Next.js 14**, **Supabase**, and **Go
 
 | Layer | Technology |
 |---|---|
-| Frontend + Backend | Next.js 14 (App Router) |
+| Frontend + Backend | Next.js 14 (SSR + Client Components) |
 | Authentication | Supabase Auth |
 | Database | Supabase (PostgreSQL) |
 | AI Integration | Google Gemini 1.5 Flash API |
-| Styling | Vanilla CSS (custom design system) |
-| Version Control | Git + GitHub |
-| Deployment | VPS (PM2 + Nginx) |
+| Styling | Vanilla CSS (Ivory Edition Design System) |
+| Deployment | **Vercel** (Optimized for Edge/Serverless) |
 
 ---
 
@@ -118,51 +115,17 @@ comments: id, post_id, user_id, comment_text, created_at
 
 ---
 
-## 🚢 Deployment (VPS with PM2 + Nginx)
+## 🚢 Deployment (Vercel)
 
-### On VPS
-```bash
-# Install dependencies
-curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
-sudo apt-get install -y nodejs
-npm install -g pm2
+Hivon Blogs is optimized for deployment on **Vercel**.
 
-# Clone repo
-git clone https://github.com/YOUR_USERNAME/hivon-blogs.git
-cd hivon-blogs
-npm install
-
-# Set environment variables
-cp .env.example .env.local
-nano .env.local  # fill in your values
-
-# Build
-npm run build
-
-# Start with PM2
-pm2 start npm --name "hivon-blogs" -- start
-pm2 save
-pm2 startup
-```
-
-### Nginx Config
-```nginx
-server {
-    listen 80;
-    server_name yourdomain.com;
-
-    location / {
-        proxy_pass http://localhost:3000;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_cache_bypass $http_upgrade;
-    }
-}
-```
-
-Update Supabase **Site URL** and **Redirect URLs** to your production domain.
+1. **Connect Repository**: Import the project into Vercel.
+2. **Environment Variables**: Add the following in Vercel Project Settings:
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - `GEMINI_API_KEY`
+3. **Build Settings**: The default Next.js settings will work automatically.
+4. **Site URL**: Update your Supabase **Authentication → URL Configuration** to match your Vercel deployment URL (e.g., `https://your-app.vercel.app`).
 
 ---
 
@@ -171,46 +134,33 @@ Update Supabase **Site URL** and **Redirect URLs** to your production domain.
 ```
 src/
 ├── app/
-│   ├── api/generate-summary/   # Gemini AI endpoint
-│   ├── auth/login/             # Login page
-│   ├── auth/register/          # Register page
-│   ├── posts/create/           # Create post
-│   ├── posts/[id]/             # Post detail
-│   ├── posts/[id]/edit/        # Edit post
-│   ├── admin/                  # Admin dashboard
-│   ├── layout.tsx              # Root layout
-│   ├── page.tsx                # Home page
-│   └── globals.css             # Design system
+│   ├── api/generate-summary/   # AI Orchestration
+│   ├── HomePageClient.tsx      # Interactive Feed logic
+│   ├── page.tsx                # SSR Entry Point
+│   ├── globals.css             # Ivory Edition Styles
+│   └── ...
 ├── components/
+│   ├── ui/                    # Design System (Skeletons, Gallery)
 │   ├── Navbar.tsx
-│   ├── PostCard.tsx
-│   └── CommentSection.tsx
-├── context/
-│   └── AuthContext.tsx
+│   └── ...
 ├── lib/supabase/
-│   ├── client.ts               # Browser client
-│   └── server.ts               # Server client
-│   └── server.ts               # Server client
-├── middleware.ts                # Route protection
-└── types/index.ts              # TypeScript types
-supabase/
-└── schema.sql                  # DB schema + RLS
+│   ├── client.ts               # CSR Client
+│   └── server.ts               # SSR Client
+├── middleware.ts                # Route Protection
+└── ...
 ```
 
 ---
 
 ## 🤖 AI Tool Used
 
-This project was built using **Antigravity** (by Google DeepMind), an AI coding assistant.
+This project was built and optimized using **Antigravity** (by Google DeepMind), an AI coding assistant.
 
-**Why Antigravity?** It provided end-to-end code generation with context awareness across the entire project, making architectural decisions, writing boilerplate, and suggesting best practices simultaneously.
-
-**How it helped:**
-- Scaffolded the entire Next.js project structure from scratch
-- Generated the complete Supabase schema with RLS policies
-- Implemented the Gemini AI integration with cost-optimization strategy
-- Wrote all React components with proper TypeScript types
-- Created the premium dark-mode CSS design system
+**Engineering Highlights:**
+- **SSR Migration**: Transitioned the home page to Server-Side Rendering to eliminate hydration flickering and layout shifts.
+- **Visual Stability**: Implemented a synchronized `FullPageSkeleton` and architectural z-index hardening for a "FAANG-level" premium UI.
+- **AI Service Resilience**: Automated summary generation with non-blocking graceful fallbacks for API quota limits.
+- **Clean Architecture**: Enforced strict TypeScript typing and server-side route protection.
 
 ---
 
