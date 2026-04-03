@@ -8,6 +8,7 @@ import PostCard from '@/components/PostCard';
 import { useAuth } from '@/context/AuthContext';
 import CircularGallery from '@/components/ui/circular-flip-card-gallery';
 import { FullPageSkeleton } from '@/components/ui/Skeleton';
+import { GradientBarsBackground } from '@/components/ui/gradient-bars-background';
 
 const POSTS_PER_PAGE = 9;
 
@@ -140,7 +141,17 @@ export default function HomePageClient({ initialPosts, initialCount }: HomePageC
   const totalPages = Math.max(1, Math.ceil(totalCount / POSTS_PER_PAGE));
 
   if (!showBlog) {
-    return <CircularGallery onStartReading={handleStartReading} posts={posts} />;
+    return (
+      <GradientBarsBackground
+        numBars={11}
+        gradientFrom="rgba(245, 158, 11, 0.15)" // Subtle Hivon Amber
+        gradientTo="transparent"
+        animationDuration={4}
+        backgroundColor="var(--bg-primary)"
+      >
+        <CircularGallery onStartReading={handleStartReading} posts={posts} />
+      </GradientBarsBackground>
+    );
   }
 
   // Only show skeleton if we are loading and have NO posts (shouldn't happen with SSR initialPosts)
