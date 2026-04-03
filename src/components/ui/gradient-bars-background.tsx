@@ -31,8 +31,9 @@ const GradientBars: React.FC<GradientBarsProps> = ({
     <>
       <style>{`
         @keyframes pulseBar {
-          0% { transform: scaleY(var(--initial-scale)); }
-          100% { transform: scaleY(calc(var(--initial-scale) * 0.7)); }
+          0% { transform: translateY(0) scaleY(var(--initial-scale)); opacity: 0.8; }
+          50% { transform: translateY(-15px) scaleY(calc(var(--initial-scale) * 1.05)); opacity: 1; }
+          100% { transform: translateY(0) scaleY(calc(var(--initial-scale) * 0.9)); opacity: 0.8; }
         }
       `}</style>
       
@@ -54,12 +55,13 @@ const GradientBars: React.FC<GradientBarsProps> = ({
                 style={{
                   flex: `1 0 calc(100% / ${numBars})`,
                   maxWidth: `calc(100% / ${numBars})`,
-                  height: '100%',
+                  height: 'calc(100% + 40px)',
+                  bottom: '-20px',
                   background: `linear-gradient(to top, ${gradientFrom}, ${gradientTo})`,
                   transform: `scaleY(${height / 100})`,
                   transformOrigin: 'bottom',
                   transition: 'transform 0.5s ease-in-out',
-                  animation: `pulseBar ${animationDuration}s ease-in-out infinite alternate`,
+                  animation: `pulseBar ${animationDuration + (index % 3)}s ease-in-out infinite alternate`,
                   animationDelay: `${index * 0.1}s`,
                   outline: '1px solid rgba(0, 0, 0, 0)',
                   boxSizing: 'border-box',
