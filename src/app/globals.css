@@ -125,9 +125,10 @@ main {
   min-height: calc(100vh - 150px);
   padding-top: 2rem;
   padding-bottom: 4rem;
-  background: var(--bg-primary); /* Ensure solid background to cover fixed elements */
+  background: rgba(247, 244, 237, 0.82); /* Translucent Ivory to show global animated bars */
+  backdrop-filter: blur(4px); /* Optional: slight blur for depth */
   position: relative;
-  z-index: 1; /* Local stack in main */
+  z-index: 1;
 }
 
 /* Force hide gallery when blog feed is active to prevent 'bleed-through' in blurs/vignettes */
