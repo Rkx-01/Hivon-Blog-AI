@@ -81,10 +81,10 @@ Open [http://localhost:3000](http://localhost:3000)
 | **Author** | All Viewer permissions + create/edit own posts |
 | **Admin** | All permissions + edit any post, delete posts, monitor comments |
 
-### Creating an Admin User
-1. Register a normal account at `/auth/register`
-2. Go to your Supabase dashboard → **Table Editor → users**
-3. Find your user and set `role` to `admin`
+### Demo Admin Credentials
+For testing purposes, you can use the following admin account:
+- **Email**: `admin@gmail.com`
+- **Password**: `admin@`
 
 ---
 
