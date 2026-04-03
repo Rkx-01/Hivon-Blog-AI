@@ -94,8 +94,8 @@ export function GradientBarsBackground({
 }: ComponentProps) {
   return (
     <section 
-      className="relative min-h-screen w-full flex flex-col items-center justify-center overflow-hidden"
-      style={{ backgroundColor }}
+      className="fixed inset-0 w-full h-full overflow-hidden"
+      style={{ backgroundColor, zIndex: -1 }}
     >
       <GradientBars
         numBars={numBars}
@@ -105,7 +105,7 @@ export function GradientBarsBackground({
       />
       
       {children && (
-        <div className="relative z-10 w-full h-full flex items-center justify-center">
+        <div className="fixed inset-0 z-10 w-full h-full">
           {children}
         </div>
       )}

@@ -21,7 +21,7 @@ export default function RootLayout({
         <AuthProvider>
           <NavigationReset />
           <Navbar />
-          <main style={{ position: 'relative', zIndex: 10, background: 'var(--bg-primary)', minHeight: 'calc(100vh - 150px)' }}>{children}</main>
+          <main style={{ position: 'relative', zIndex: 10, background: 'transparent', minHeight: 'calc(100vh - 150px)' }}>{children}</main>
           <footer className="global-footer">
             Hivon Blogs © 2026 · Powered by Gemini AI
           </footer>

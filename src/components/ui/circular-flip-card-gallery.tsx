@@ -116,7 +116,7 @@ export default function CircularGallery({ onStartReading, posts = [] }: { onStar
     <div 
       ref={containerRef}
       className="hivon-gallery"
-      style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-primary)', zIndex: 0, overflow: 'hidden' }}
+      style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', zIndex: 0, overflow: 'hidden' }}
     >
 
       <div

@@ -143,10 +143,10 @@ export default function HomePageClient({ initialPosts, initialCount }: HomePageC
   if (!showBlog) {
     return (
       <GradientBarsBackground
-        numBars={11}
-        gradientFrom="rgba(245, 158, 11, 0.15)" // Subtle Hivon Amber
-        gradientTo="transparent"
-        animationDuration={4}
+        numBars={15}
+        gradientFrom="rgba(245, 158, 11, 0.4)" // Increased opacity for visibility
+        gradientTo="rgba(245, 158, 11, 0)"     // Explicit transparent matching color
+        animationDuration={3}
         backgroundColor="var(--bg-primary)"
       >
         <CircularGallery onStartReading={handleStartReading} posts={posts} />
