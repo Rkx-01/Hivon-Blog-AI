@@ -29,10 +29,7 @@ export default function RootLayout({
             animationDuration={3}
             backgroundColor="var(--bg-primary)"
           />
-          <main style={{ position: 'relative', zIndex: 10, background: 'transparent', minHeight: 'calc(100vh - 150px)' }}>{children}</main>
-          <footer className="global-footer">
-            Hivon Blogs © 2026 · Powered by Gemini AI
-          </footer>
+          <main style={{ position: 'relative', zIndex: 10, background: 'transparent' }}>{children}</main>
         </AuthProvider>
       </body>
     </html>
